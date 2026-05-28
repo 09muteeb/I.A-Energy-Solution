@@ -64,14 +64,15 @@ export const cartRouter = createRouter({
         return { ...existing[0], quantity: newQty };
       }
 
+      // FIX: PostgreSQL uses .returning() to get inserted ID
       const result = await db.insert(cartItems).values({
         userId,
         productId: input.productId,
         quantity: input.quantity,
-      });
+      }).returning({ id: cartItems.id });
 
       return {
-        id: Number(result[0].insertId),
+        id: result[0].id,
         userId,
         productId: input.productId,
         quantity: input.quantity,

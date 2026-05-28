@@ -1,140 +1,89 @@
-import {
-  mysqlTable,
-  mysqlEnum,
-  serial,
-  varchar,
-  text,
-  timestamp,
-  bigint,
-  decimal,
-  int,
-  boolean,
-  json,
-} from "drizzle-orm/mysql-core";
+import { pgTable, serial, varchar, text, integer, boolean, timestamp, decimal, json } from "drizzle-orm/pg-core";
 
-export const users = mysqlTable("users", {
+export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  unionId: varchar("unionId", { length: 255 }).notNull().unique(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
   name: varchar("name", { length: 255 }),
-  email: varchar("email", { length: 320 }),
   avatar: text("avatar"),
-  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt")
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
-  lastSignInAt: timestamp("lastSignInAt").defaultNow().notNull(),
+  role: varchar("role", { length: 50 }).default("customer"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  lastSignInAt: timestamp("last_sign_in_at"),
+  unionId: varchar("union_id", { length: 255 }),
 });
 
-export const products = mysqlTable("products", {
+export const products = pgTable("products", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   slug: varchar("slug", { length: 255 }).notNull().unique(),
-  category: mysqlEnum("category", [
-    "home_system",
-    "commercial",
-    "inverter",
-    "battery",
-    "accessory",
-  ]).notNull(),
   description: text("description"),
-  price: decimal("price", { precision: 12, scale: 2 }).notNull(),
-  comparePrice: decimal("comparePrice", { precision: 12, scale: 2 }),
-  image: varchar("image", { length: 500 }),
-  images: json("images"),
-  specs: json("specs"),
-  stock: int("stock").default(0),
+  shortDescription: text("short_description"),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  originalPrice: decimal("original_price", { precision: 10, scale: 2 }),
+  comparePrice: decimal("compare_price", { precision: 10, scale: 2 }),
+  category: varchar("category", { length: 100 }),
+  capacity: varchar("capacity", { length: 50 }),
+  badge: varchar("badge", { length: 50 }),
+  image: text("image"),
+  images: json("images").$type<string[]>(),
+  features: json("features").$type<string[]>(),
+  specifications: json("specifications").$type<Record<string, string>>(),
+  specs: json("specs").$type<Record<string, string>>(),
+  stock: integer("stock").default(0),
+  inStock: boolean("in_stock").default(true),
   featured: boolean("featured").default(false),
-  rating: decimal("rating", { precision: 2, scale: 1 }).default("5.0"),
-  reviewCount: int("reviewCount").default(0),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt")
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
+  reviewCount: integer("review_count").default(0),
+  rating: decimal("rating", { precision: 3, scale: 1 }).default("4.5"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const orders = mysqlTable("orders", {
+export const orders = pgTable("orders", {
   id: serial("id").primaryKey(),
-  userId: bigint("userId", { mode: "number", unsigned: true }),
-  status: mysqlEnum("status", [
-    "pending",
-    "processing",
-    "shipped",
-    "delivered",
-    "cancelled",
-  ])
-    .default("pending")
-    .notNull(),
-  total: decimal("total", { precision: 12, scale: 2 }).notNull(),
-  subtotal: decimal("subtotal", { precision: 12, scale: 2 }).notNull(),
-  shipping: decimal("shipping", { precision: 12, scale: 2 }).notNull(),
-  paymentMethod: mysqlEnum("paymentMethod", ["cod", "bank_transfer"])
-    .default("cod")
-    .notNull(),
-  paymentStatus: mysqlEnum("paymentStatus", ["pending", "paid", "failed"])
-    .default("pending")
-    .notNull(),
-  fullName: varchar("fullName", { length: 255 }).notNull(),
-  email: varchar("email", { length: 320 }).notNull(),
-  phone: varchar("phone", { length: 50 }).notNull(),
-  address: varchar("address", { length: 500 }).notNull(),
-  city: varchar("city", { length: 100 }).notNull(),
-  province: varchar("province", { length: 100 }).notNull(),
-  postalCode: varchar("postalCode", { length: 20 }),
-  notes: text("notes"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt")
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
-});
-
-export const orderItems = mysqlTable("order_items", {
-  id: serial("id").primaryKey(),
-  orderId: bigint("orderId", { mode: "number", unsigned: true })
-    .notNull(),
-  productId: bigint("productId", { mode: "number", unsigned: true })
-    .notNull(),
-  quantity: int("quantity").notNull(),
-  price: decimal("price", { precision: 12, scale: 2 }).notNull(),
-  total: decimal("total", { precision: 12, scale: 2 }).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
-export const cartItems = mysqlTable("cart_items", {
-  id: serial("id").primaryKey(),
-  userId: bigint("userId", { mode: "number", unsigned: true }).notNull(),
-  productId: bigint("productId", { mode: "number", unsigned: true })
-    .notNull(),
-  quantity: int("quantity").notNull().default(1),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt")
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
-});
-
-export const contacts = mysqlTable("contacts", {
-  id: serial("id").primaryKey(),
-  fullName: varchar("fullName", { length: 255 }).notNull(),
-  email: varchar("email", { length: 320 }).notNull(),
+  userId: integer("user_id").references(() => users.id),
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }),
+  shipping: decimal("shipping", { precision: 10, scale: 2 }),
+  total: decimal("total", { precision: 10, scale: 2 }),
+  paymentMethod: varchar("payment_method", { length: 50 }),
+  paymentStatus: varchar("payment_status", { length: 50 }).default("pending"),
+  status: varchar("status", { length: 50 }).default("pending"),
+  fullName: varchar("full_name", { length: 255 }),
+  email: varchar("email", { length: 255 }),
   phone: varchar("phone", { length: 50 }),
-  subject: varchar("subject", { length: 255 }).notNull(),
-  message: text("message").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  address: text("address"),
+  city: varchar("city", { length: 100 }),
+  province: varchar("province", { length: 100 }),
+  postalCode: varchar("postal_code", { length: 20 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export type User = typeof users.$inferSelect;
-export type InsertUser = typeof users.$inferInsert;
-export type Product = typeof products.$inferSelect;
-export type InsertProduct = typeof products.$inferInsert;
-export type Order = typeof orders.$inferSelect;
-export type InsertOrder = typeof orders.$inferInsert;
-export type OrderItem = typeof orderItems.$inferSelect;
-export type InsertOrderItem = typeof orderItems.$inferInsert;
-export type CartItem = typeof cartItems.$inferSelect;
-export type InsertCartItem = typeof cartItems.$inferInsert;
-export type Contact = typeof contacts.$inferSelect;
-export type InsertContact = typeof contacts.$inferInsert;
+export const orderItems = pgTable("order_items", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").references(() => orders.id),
+  productId: integer("product_id").references(() => products.id),
+  quantity: integer("quantity").notNull(),
+  price: decimal("price", { precision: 10, scale: 2 }),
+  total: decimal("total", { precision: 10, scale: 2 }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const cartItems = pgTable("cart_items", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  productId: integer("product_id").references(() => products.id),
+  quantity: integer("quantity").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const contacts = pgTable("contacts", {
+  id: serial("id").primaryKey(),
+  fullName: varchar("full_name", { length: 255 }),
+  name: varchar("name", { length: 255 }),
+  email: varchar("email", { length: 255 }),
+  phone: varchar("phone", { length: 50 }),
+  subject: varchar("subject", { length: 255 }),
+  message: text("message"),
+  createdAt: timestamp("created_at").defaultNow(),
+});

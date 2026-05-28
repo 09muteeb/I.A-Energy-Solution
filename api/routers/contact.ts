@@ -16,13 +16,16 @@ export const contactRouter = createRouter({
     )
     .mutation(async ({ input }) => {
       const db = getDb();
+      
+      // FIX: PostgreSQL uses .returning() to get inserted ID
       const result = await db.insert(contacts).values({
         fullName: input.fullName,
         email: input.email,
         phone: input.phone ?? null,
         subject: input.subject,
         message: input.message,
-      });
-      return { success: true, id: Number(result[0].insertId) };
+      }).returning({ id: contacts.id });
+      
+      return { success: true, id: result[0].id };
     }),
 });

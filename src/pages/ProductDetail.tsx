@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router";
+import { useParams, Link, useNavigate } from "react-router";
 import { trpc } from "@/providers/trpc";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/components/ToastContainer";
@@ -7,6 +7,7 @@ import { Star, Minus, Plus, ShoppingCart, ArrowLeft } from "lucide-react";
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<"description" | "specs" | "reviews">("description");
   const { addItem, setIsCartOpen } = useCart();
@@ -46,9 +47,11 @@ export default function ProductDetail() {
     setIsCartOpen(true);
   };
 
-  const formatPrice = (price: string) => `PKR ${Number(price).toLocaleString("en-PK")}`;
+  const formatPrice = (price: string | number) => `PKR ${Number(price).toLocaleString("en-PK")}`;
 
-  const specs = product?.specs ? JSON.parse(product.specs as string) as Record<string, string> : {};
+  const specs: Record<string, string> = product?.specs 
+    ? (typeof product.specs === 'string' ? JSON.parse(product.specs) : product.specs as Record<string, string>) 
+    : {};
 
   const reviews = [
     { name: "Ali Hassan", rating: 5, date: "2025-04-15", comment: "Excellent product! Installation was smooth and the system works perfectly." },
@@ -113,7 +116,7 @@ export default function ProductDetail() {
 
             {/* Info */}
             <div>
-              <p className="text-xs uppercase tracking-wider mb-2 capitalize" style={{ color: "var(--text-muted)" }}>
+              <p className="text-xs uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>
                 {product.category?.replace("_", " ")}
               </p>
               <h1
@@ -132,10 +135,10 @@ export default function ProductDetail() {
                     <Star
                       key={i}
                       size={16}
-                      fill={i < Math.round(Number(product.rating)) ? "var(--accent)" : "none"}
+                      fill={i < Math.round(Number(product.rating ?? 0)) ? "var(--accent)" : "none"}
                       style={{
                         color:
-                          i < Math.round(Number(product.rating))
+                          i < Math.round(Number(product.rating ?? 0))
                             ? "var(--accent)"
                             : "var(--border)",
                       }}
@@ -143,7 +146,7 @@ export default function ProductDetail() {
                   ))}
                 </div>
                 <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-                  {product.rating} ({product.reviewCount} reviews)
+                  {product.rating ?? "0"} ({product.reviewCount ?? 0} reviews)
                 </span>
               </div>
 
@@ -196,9 +199,28 @@ export default function ProductDetail() {
                 <ShoppingCart size={18} className="mr-2" />
                 Add to Cart
               </button>
-              <Link to="/checkout" className="btn-primary w-full text-center block" style={{ backgroundColor: "var(--accent-dark)" }}>
+                            <button 
+                onClick={() => {
+                  if (!product) return;
+                  addItem(
+                    {
+                      productId: product.id,
+                      name: product.name,
+                      slug: product.slug,
+                      image: product.image ?? "",
+                      price: Number(product.price),
+                    },
+                    quantity
+                  );
+                  addToast(`${product.name} added to cart`, "success");
+                  setIsCartOpen(false);
+                  navigate("/checkout");
+                }} 
+                className="btn-primary w-full text-center block" 
+                style={{ backgroundColor: "var(--accent-dark)" }}
+              >
                 Buy Now
-              </Link>
+              </button>
             </div>
           </div>
         </div>

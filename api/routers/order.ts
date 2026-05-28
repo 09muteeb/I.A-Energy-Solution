@@ -33,11 +33,12 @@ export const orderRouter = createRouter({
     .mutation(async ({ input }) => {
       const db = getDb();
 
+      // FIX: PostgreSQL uses .returning() to get inserted ID
       const orderResult = await db.insert(orders).values({
         userId: input.userId ?? null,
-        total: input.total.toFixed(2),
-        subtotal: input.subtotal.toFixed(2),
-        shipping: input.shipping.toFixed(2),
+        total: String(input.total.toFixed(2)),
+        subtotal: String(input.subtotal.toFixed(2)),
+        shipping: String(input.shipping.toFixed(2)),
         paymentMethod: input.paymentMethod,
         fullName: input.fullName,
         email: input.email,
@@ -47,17 +48,17 @@ export const orderRouter = createRouter({
         province: input.province,
         postalCode: input.postalCode ?? null,
         notes: input.notes ?? null,
-      });
+      }).returning({ id: orders.id });
 
-      const orderId = Number(orderResult[0].insertId);
+      const orderId = orderResult[0].id;
 
       for (const item of input.items) {
         await db.insert(orderItems).values({
           orderId,
           productId: item.productId,
           quantity: item.quantity,
-          price: item.price.toFixed(2),
-          total: (item.price * item.quantity).toFixed(2),
+          price: String(item.price.toFixed(2)),
+          total: String((item.price * item.quantity).toFixed(2)),
         });
       }
 
