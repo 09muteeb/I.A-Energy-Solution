@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { createRouter, authedQuery } from "../middleware";
-import { getDb } from "../queries/connection";
-import { cartItems, products } from "@db/schema";
+import { createRouter, authedQuery } from "../middleware.js";
+import { getDb } from "../queries/connection.js";
+import { cartItems, products } from "../../db/schema.js";
 import { eq, and, sql } from "drizzle-orm";
 
 export const cartRouter = createRouter({
@@ -142,3 +142,4 @@ export const cartRouter = createRouter({
     return { count: Number(result[0]?.count ?? 0) };
   }),
 });
+

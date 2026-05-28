@@ -1,12 +1,11 @@
-import { authRouter } from "./auth-router";
-import { productRouter } from "./routers/product";
-import { cartRouter } from "./routers/cart";
-import { orderRouter } from "./routers/order";
-import { contactRouter } from "./routers/contact";
-import { createRouter, publicQuery } from "./middleware";
+import { createRouter } from "./middleware.js";
+import { authRouter } from "./auth-router.js";
+import { productRouter } from "./routers/product.js";
+import { cartRouter } from "./routers/cart.js";
+import { orderRouter } from "./routers/order.js";
+import { contactRouter } from "./routers/contact.js";
 
 export const appRouter = createRouter({
-  ping: publicQuery.query(() => ({ ok: true, ts: Date.now() })),
   auth: authRouter,
   product: productRouter,
   cart: cartRouter,
@@ -15,3 +14,4 @@ export const appRouter = createRouter({
 });
 
 export type AppRouter = typeof appRouter;
+

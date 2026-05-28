@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { createRouter, publicQuery, authedQuery } from "../middleware";
-import { getDb } from "../queries/connection";
-import { orders, orderItems, cartItems } from "@db/schema";
+import { createRouter, publicQuery, authedQuery } from "../middleware.js";
+import { getDb } from "../queries/connection.js";
+import { orders, orderItems, cartItems } from "../../db/schema.js";
 import { eq, desc } from "drizzle-orm";
 
 export const orderRouter = createRouter({
@@ -105,3 +105,4 @@ export const orderRouter = createRouter({
       .orderBy(desc(orders.createdAt));
   }),
 });
+

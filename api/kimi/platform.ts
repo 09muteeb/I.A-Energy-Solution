@@ -1,5 +1,5 @@
-import { env } from "../lib/env";
-import type { UserProfile } from "./types";
+import { env } from "../lib/env.js";
+import type { UserProfile } from "./types.js";
 
 async function kimiRequest<T>(
   path: string,
@@ -28,3 +28,5 @@ export const users = {
   getProfile: (token: string) =>
     kimiRequest<UserProfile>("/v1/users/me/profile", token),
 };
+
+

@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { createRouter, publicQuery } from "./middleware";
-import { getDb } from "./queries/connection";
-import { orders } from "@db/schema";
+import { createRouter, publicQuery } from "./middleware.js";
+import { getDb } from "./queries/connection.js";
+import { orders } from "../../db/schema.js";
 
 export const reservationRouter = createRouter({
   create: publicQuery
@@ -24,3 +24,5 @@ export const reservationRouter = createRouter({
       return { id: 0, success: true };
     }),
 });
+
+

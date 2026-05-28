@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { createRouter, publicQuery } from "../middleware";
-import { getDb } from "../queries/connection";
-import { products } from "@db/schema";
+import { createRouter, publicQuery } from "../middleware.js";
+import { getDb } from "../queries/connection.js";
+import { products } from "../../db/schema.js";
 import { eq, like, and, gte, lte, desc, asc, sql } from "drizzle-orm";
 
 const listInput = z.object({
@@ -124,3 +124,5 @@ export const productRouter = createRouter({
         .limit(input.limit);
     }),
 });
+
+

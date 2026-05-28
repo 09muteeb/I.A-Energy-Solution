@@ -15,3 +15,5 @@ export function getSessionCookieOptions(headers: Headers): CookieOptions {
     secure: !localhost,
   };
 }
+
+

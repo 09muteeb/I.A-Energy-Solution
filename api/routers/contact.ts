@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { createRouter, publicQuery } from "../middleware";
-import { getDb } from "../queries/connection";
-import { contacts } from "@db/schema";
+import { createRouter, publicQuery } from "../middleware.js";
+import { getDb } from "../queries/connection.js";
+import { contacts } from "../../db/schema.js";
 
 export const contactRouter = createRouter({
   submit: publicQuery
@@ -29,3 +29,4 @@ export const contactRouter = createRouter({
       return { success: true, id: result[0].id };
     }),
 });
+
